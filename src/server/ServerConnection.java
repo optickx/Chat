@@ -1,49 +1,41 @@
-package client;
+package server;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ClientConnection {
-
+public class ServerConnection {
+    
     private final int PORT;
-    private final String MACHINE;
 
     private Socket socket;
-    // read data from the outside world (iugh)
+    private ServerSocket serverSocket;
     private DataOutputStream send;
-    // sends data to the outside world :)
     private DataInputStream read;
 
-    public ClientConnection(int pPort, String pMachine) {
+    public ServerConnection(int pPort) {
         PORT = pPort;
-        MACHINE = pMachine;
     }
 
-    /**
-     * send the data.
-     * 
-     */
     public void sendString(String pMessage) {
         try {
             send.writeUTF(pMessage);
         } catch (IOException ioe) {
-            print("There was an error sending the message (client)");
+            print("There was an error sending the message (server)");
         }
     }
 
-    /**
-     */
     public String readString() {
         try {
             return read.readUTF();
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
+        } catch (Exception e) {
+            print("There was an error receiving the message (server)");
         }
         return "!";
     }
-
+    
     public void closeEverything() {
         try {
             send.close();
@@ -54,16 +46,16 @@ public class ClientConnection {
         }
     }
 
-    // opens the connection to
     public void initializeService() {
-        print("Waiting for the connection.");
+        print("Waiting for the connection");
         try {
-            socket = new Socket(MACHINE, PORT);
-            print("Connection successful.");
+            serverSocket = new ServerSocket(PORT);
+            socket = serverSocket.accept();
+                print("Connection succesful.");
             read = new DataInputStream(socket.getInputStream());
             send = new DataOutputStream(socket.getOutputStream());
         } catch (Exception e) {
-            print("There was an error with the connection on client.");
+            print("There was an error with the connection on server.");
         }
     }
 
